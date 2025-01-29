@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TaskRepository implements ITaskRepository {
 
-    private static final String FILE_DIRECTORY  = "tasktracker/src/main/resources/";
+    private static final String FILE_DIRECTORY  = "src/main/resources/";
     private static final String FILE_PATH = "tasks.json";
 
     private File file;

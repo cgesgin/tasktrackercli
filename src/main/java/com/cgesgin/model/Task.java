@@ -1,19 +1,21 @@
 package com.cgesgin.model;
 
 import com.cgesgin.model.enums.Status;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Task {
     
     private int id;
     private String description;
     private Status status;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Task() {
     }
 
-    public Task(int id, String description, Status status, String createdAt, String updatedAt) {
+    public Task(int id, String description, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.description = description;
         this.status = status;
@@ -45,30 +47,27 @@ public class Task {
         this.status = status;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public String getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                '}';
+        return String.format("ID: %d | %s | %s | Oluşturulma: %s | Güncelleme: %s", 
+            id, description, status, 
+            createdAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            updatedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 }
