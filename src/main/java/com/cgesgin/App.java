@@ -4,111 +4,145 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-import java.time.LocalDateTime;
 
 import com.cgesgin.model.Task;
 import com.cgesgin.model.enums.Status;
 import com.cgesgin.model.service.ITaskSevice;
 import com.cgesgin.repository.TaskRepository;
 import com.cgesgin.service.TaskService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class App {
 
-    private static final String TASKS_FILE = "tasks.json";
     private static ITaskSevice taskService = new TaskService(new TaskRepository());
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule());
 
     public static void main(String[] args) {
-        if (args.length == 0) {
-            showHelp();
-            return;
-        }
 
-        String command = args[0].toLowerCase();
-        
-        try {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type 'help' for available commands.");
+
+        int id;
+        String description;
+
+        while (true) {
+            System.out.print("Enter command: ");
+
+            String commandLine = scanner.nextLine();
+            String[] commandArgs = commandLine.split(" ");
+
+            if (commandArgs.length == 0) {
+                System.out.println("No command provided. Type 'help' for usage.");
+                continue;
+            }
+
+            String command = commandArgs[0].toLowerCase();
+
             switch (command) {
                 case "add":
-                    if (args.length < 2) {
-                        System.out.println("Görev açıklaması gerekli!");
-                        return;
+                    if (commandArgs.length < 2) {
+                        System.out.println("Task description is required.");
+                        break;
                     }
-                    String description = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                    description = String.join(" ", Arrays.copyOfRange(commandArgs, 1, commandArgs.length));
                     addTask(description);
                     break;
-                    
-                case "list":
-                    if (args.length == 1) {
-                        listTasks();
-                    } else {
-                        String status = args[1].toUpperCase();
-                        listTasksByStatus(Status.valueOf(status));
+
+                case "update":
+                    if (commandArgs.length < 3) {
+                        System.out.println("Task ID and new description are required.");
+                        break;
                     }
+                    id = Integer.parseInt(commandArgs[1]);
+                    description = String.join(" ", Arrays.copyOfRange(commandArgs, 2, commandArgs.length));
+                    updateTask(id, description);
                     break;
-                    
-                case "complete":
-                    if (args.length < 2) {
-                        System.out.println("Görev ID'si gerekli!");
-                        return;
-                    }
-                    completeTask(Integer.parseInt(args[1]));
-                    break;
-                    
+
                 case "delete":
-                    if (args.length < 2) {
-                        System.out.println("Görev ID'si gerekli!");
-                        return;
+                    if (commandArgs.length < 2) {
+                        System.out.println("Task ID is required.");
+                        break;
                     }
-                    deleteTask(Integer.parseInt(args[1]));
+                    id = Integer.parseInt(commandArgs[1]);
+                    deleteTask(id);
                     break;
-                    
+
+                case "mark-in-progress":
+                    if (commandArgs.length < 2) {
+                        System.out.println("Task ID is required.");
+                        break;
+                    }
+                    id = Integer.parseInt(commandArgs[1]);
+                    markInProgress(id);
+                    break;
+
+                case "mark-done":
+                    if (commandArgs.length < 2) {
+                        System.out.println("Task ID is required.");
+                        break;
+                    }
+                    id = Integer.parseInt(commandArgs[1]);
+                    markDone(id);
+                    break;
+
+                case "mark-todo":
+                    if (commandArgs.length < 2) {
+                        System.out.println("Task ID is required.");
+                        break;
+                    }
+                    id = Integer.parseInt(commandArgs[1]);
+                    markTODO(id);
+                    break;
+
+                case "list":
+                    if (commandArgs.length == 1) {
+                        listTasks();
+                    } 
+                    break;
+
                 case "help":
                     showHelp();
                     break;
-                    
+
+                case "exit":
+                    System.out.println("Exiting application...");
+                    scanner.close();
+                    return;
+
                 default:
-                    System.out.println("Geçersiz komut! Yardım için 'help' yazın.");
+                    System.out.println("Unknown command. Type 'help' for usage.");
+                    break;
             }
-        } catch (Exception e) {
-            System.out.println("Hata oluştu: " + e.getMessage());
         }
     }
 
     private static void showHelp() {
-        System.out.println("Task Tracker CLI Kullanımı:");
-        System.out.println("  add \"Görev açıklaması\"              - Yeni görev ekle");
-        System.out.println("  update <ID> \"Yeni açıklama\"         - Görevi güncelle");
-        System.out.println("  delete <ID>                           - Görevi sil");
-        System.out.println("  mark-in-progress <ID>                 - Görevi IN_PROGRESS olarak işaretle");
-        System.out.println("  mark-done <ID>                        - Görevi DONE olarak işaretle");
-        System.out.println("  list                                  - Tüm görevleri listele");
-        System.out.println("  list <status>                         - Duruma göre listele (TODO/IN_PROGRESS/DONE)");
+        System.out.println("Task CLI Usage:");
+        System.out.println("add \"Task description\"                  - Add a new task");
+        System.out.println("update <ID> \"New Task description\"      - Update a task");
+        System.out.println("delete <ID>                               - Delete a task");
+        System.out.println("mark-in-progress <ID>                     - Mark a task as IN_PROGRESS");
+        System.out.println("mark-done <ID>                            - Mark a task as DONE");
+        System.out.println("mark-todo <ID>                            - Mark a task as TODO");
+        System.out.println("list                                      - List all tasks");
+        System.out.println("list <status>                             - List tasks by status (todo, in-progress, done)");
+        System.out.println("exit                                      - Exit the application");
     }
 
     private static void addTask(String description) {
         Task task = new Task();
         task.setDescription(description);
-        task.setCreatedAt(LocalDateTime.now());
-        task.setUpdatedAt(LocalDateTime.now());
         taskService.save(task);
-        System.out.println("Görev başarıyla eklendi. (ID: " + task.getId() + ")");
+        System.out.println("Task added successfully.");
     }
 
     private static void updateTask(int id, String description) {
-        Optional<Task> taskOpt = taskService.get(id);
-        if (taskOpt.isEmpty()) {
-            System.out.println(id + " ID'li görev bulunamadı.");
+        Optional<Task> task = taskService.get(id);
+        if (task.isEmpty()) {
+            System.out.println("Task with ID " + id + " not found.");
             return;
         }
-        Task task = taskOpt.get();
-        task.setDescription(description);
-        task.setUpdatedAt(LocalDateTime.now());
-        taskService.update(id, task);
-        System.out.println("Görev güncellendi.");
-    }
+        task.get().setDescription(description);
+        taskService.update(id, task.get());
+    }   
 
     private static void deleteTask(int id) {
         Optional<Task> task = taskService.get(id);
@@ -160,28 +194,5 @@ public class App {
         tasks.get().forEach(task -> {
             System.out.println(task.toString());
         });
-    }
-
-    private static void completeTask(int id) {
-        Optional<Task> task = taskService.get(id);
-        if (task.isEmpty()) {
-            System.out.println("Task with ID " + id + " not found.");
-            return;
-        }
-        task.get().setStatus(Status.DONE);
-        taskService.update(id, task.get());
-        System.out.println("Task marked as DONE.");
-    }
-
-    private static void listTasksByStatus(Status status) {
-        Optional<List<Task>> tasks = taskService.getAll();
-        if (tasks.isEmpty()) {
-            System.out.println("Hiç görev bulunamadı.");
-            return;
-        }
-        
-        tasks.get().stream()
-            .filter(task -> task.getStatus() == status)
-            .forEach(task -> System.out.println(task));
     }
 }
