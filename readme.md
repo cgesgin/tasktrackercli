@@ -1,8 +1,5 @@
 # 🎯 Overview
-This project is created to contribute to the Roadmap.sh challenge. It is a simple console application that helps you manage and track tasks, implemented using Java.
-For more details about the challenge and how to contribute, check the link: Roadmap.sh Task Tracker Challenge.
-
-     https://roadmap.sh/projects/task-tracker
+Solution to the roadmap.sh project https://roadmap.sh/projects/task-tracker
 
 ## 🔍 Features
 
